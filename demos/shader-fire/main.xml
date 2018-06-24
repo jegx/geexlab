@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+
+  <window name="win3d01" title="Fire" width="1280" height="720"
+          gl_version_major="2" gl_version_minor="1" />
+ 
+  
+  
+  
+	<script name="init_scene" run_mode="INIT" >
+		<raw_data><![CDATA[	
+    
+winW, winH = gh_window.getsize(0)
+
+
+
+camera_ortho = gh_camera.create_ortho(-winW/2, winW/2, -winH/2, winH/2, 1.0, 10.0)
+gh_camera.set_viewport(camera_ortho, 0, 0, winW, winH)
+gh_camera.set_position(camera_ortho, 0, 0, 4)
+
+
+
+
+texture_prog = gh_node.getid("texture_prog")
+gh_gpu_program.uniform1i(texture_prog, "tex_noise", 0)
+gh_gpu_program.uniform1i(texture_prog, "tex_gradient", 1)
+gh_gpu_program.uniform1i(texture_prog, "tex_gradient_color", 2)
+gh_gpu_program.uniform1i(texture_prog, "tex_distortion", 3)
+gh_gpu_program.uniform1i(texture_prog, "tex_color", 4)
+
+
+
+quad = gh_mesh.create_quad(winW, winH)
+
+
+
+local abs_path = 0
+local PF_U8_RGB = 1
+local PF_U8_RGBA = 3
+local pixel_format = PF_U8_RGBA
+tex_color = gh_texture.create_from_file("./assets/1010.jpg", pixel_format, abs_path)
+tex_noise = gh_texture.create_from_file("./assets/noise06a.jpg", pixel_format, abs_path)
+tex_gradient = gh_texture.create_from_file("./assets/gradient02.jpg", pixel_format, abs_path)
+tex_gradient_color = gh_texture.create_from_file("./assets/gradient03.jpg", pixel_format, abs_path)
+tex_distortion = gh_texture.create_from_file("./assets/distortion.jpg", pixel_format, abs_path)
+
+
+
+gh_renderer.set_vsync(1)
+
+
+		]]></raw_data>
+	</script> 
+
+
+
+  
+	<script name="update_scene" run_mode="FRAME" filename="frame.lua" livecoding="1" />
+
+
+
+
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+
+gh_camera.update_ortho(camera_ortho, -winW/2, winW/2, -winH/2, winH/2, 1.0, 10.0)
+gh_camera.set_viewport(camera_ortho, 0, 0, winW, winH)
+
+gh_mesh.resize_quad(quad, winW, winH)
+
+		]]></raw_data>
+	</script> 
+
+
+
+
+
+  <gpu_program name="texture_prog" filename_ps="frag.txt" livecoding_ps="1" >
+    <raw_data_vs><![CDATA[   
+void main()
+{
+  gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;   
+  gl_TexCoord[0] = gl_MultiTexCoord0;
+}
+  ]]></raw_data_vs>
+  </gpu_program>
+
+
+  
+  
+</glsl_hacker>
