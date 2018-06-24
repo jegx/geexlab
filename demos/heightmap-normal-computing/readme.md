@@ -5,6 +5,9 @@ Article
 - https://www.geeks3d.com/hacklab/20180424/demo-heightmap-normal-computing/
 
 
+This demo requires GeeXLab
+- https://www.geeks3d.com/geexlab/downloads/
+
 
 <b>Screenshots</b>
 
