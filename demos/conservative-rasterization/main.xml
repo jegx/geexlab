@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+	
+  <window name="win3d01" title="Conservative Rasterization NV demo" 
+          width="800" height="600" 
+          gl_version_major="4" gl_version_minor="3" />
+          
+  
+
+
+	<script name="init_scene" run_mode="INIT" filename="init.lua" />
+
+
+
+  <script name="kill" run_mode="TERMINATE" >
+    <raw_data><![CDATA[ 
+
+gh_imgui.terminate()
+
+    ]]></raw_data>
+  </script> 
+
+
+
+
+
+  
+	<script name="update_scene" run_mode="FRAME" filename="frame.lua" livecoding="1" />
+
+
+	
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+
+
+		]]></raw_data>
+	</script> 
+
+
+
+
+
+  <!--
+  Atrributeless rendering (here a triangle):
+  -->
+  <gpu_program name="cr_prog" >
+    <raw_data_vs><![CDATA[	 
+#version 150
+uniform float vertexscale;
+void main()
+{
+   vec2 pos[3] = vec2[3](vec2(-1.0, -1.0), vec2(0.2, 1.0), vec2(1.0, -0.6));
+   gl_Position = vec4( pos[gl_VertexID] * vertexscale, 0.0, 1.0 );
+}
+  ]]></raw_data_vs>
+    <raw_data_ps><![CDATA[	 
+#version 150
+out vec4 FragColor;
+uniform vec4 pixelcolor;
+void main()
+{
+ FragColor = pixelcolor;
+}
+    ]]></raw_data_ps>
+  </gpu_program>
+  
+
+
+  
+    
+  <!--
+  Atrributeless rendering (here a textured quad):
+  -->
+  
+  <gpu_program name="tex_prog" >
+    <raw_data_vs><![CDATA[	 
+#version 150
+
+out vec4 Vertex_UV;
+
+uniform float vscale;
+
+const vec2[] pos = vec2[4](
+  vec2(-1.0, 1.0),
+  vec2(-1.0, -1.0),
+  vec2(1.0, 1.0),
+  vec2(1.0, -1.0)
+);
+
+const vec2[] uv = vec2[4](
+  vec2(0.0, 1.0), // top-left
+  vec2(0.0, 0.0), // bottom-left
+  vec2(1.0, 1.0), // top-right
+  vec2(1.0, 0.0)  // bottom-right
+);
+
+void main()
+{
+  //gl_Position = vec4(pos[gl_VertexID] * vec2(1.0/32.0, 1.0/32.0), 0.0, 1.0);
+  gl_Position = vec4(pos[gl_VertexID] * vec2(vscale, vscale), 0.0, 1.0);
+  Vertex_UV = vec4(uv[gl_VertexID], 0.0, 1.0);
+}
+  ]]></raw_data_vs>
+    <raw_data_ps><![CDATA[	 
+#version 150
+uniform sampler2D tex0;
+in vec4 Vertex_UV;
+out vec4 FragColor;
+void main()
+{
+  vec2 uv = Vertex_UV.xy;
+  FragColor.rgb = texture(tex0, uv).rgb;
+  FragColor.a = 1.0;
+}
+    ]]></raw_data_ps>
+  </gpu_program>
+
+
+ 
+  
+</glsl_hacker>
