@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+
+<!--
+This Vulkan demo is based on this WebGL demo: https://www.shadertoy.com/view/MdcXzn
+-->
+
+
+<glsl_hacker>
+	
+  <window name="win3d01" title="Vulkan > Shadertoy(4l2cD3)" 
+          width="800" height="480" resizable="1" menubar="1" 
+          separate_render_thread="1" gpu_index="1"
+          renderer_type="Vulkan" vsync="0" />
+  
+  
+	<script name="init_scene" run_mode="INIT" >
+		<raw_data><![CDATA[	
+    
+local demo_dir = gh_utils.get_demo_dir()
+local lib_dir = gh_utils.get_scripting_libs_dir() 		
+local framework_dir = lib_dir .. "lua/framework_v1/"
+dofile(framework_dir .. "kx.lua")
+
+
+kx_init_begin(framework_dir)
+
+-- kx_set_main_title("Vulkan / Shadertoy > Dual 3D Truchet Tiles")
+kx_set_main_title("Shadertoy Demo")
+    
+    
+    
+    
+    
+    
+    
+
+local w2 = winW/2
+local h2 = winH/2
+camera_ortho = gh_camera.create_ortho(-w2, w2, -h2, h2, 1.0, 10.0)
+gh_camera.set_viewport(camera_ortho, 0, 0, winW, winH)
+gh_camera.set_position(camera_ortho, 0, 0, 4)
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------------------------------
+--
+function UpdateCameraTransform(ub, cam)
+  local buffer_offset_bytes = 0
+  gh_gpu_buffer.set_matrix4x4(ub, buffer_offset_bytes, cam, "camera_view_projection")
+end
+
+function UpdateObjectTransform(ub, obj)
+  local buffer_offset_bytes = 64
+  gh_gpu_buffer.set_matrix4x4(ub, buffer_offset_bytes, obj, "object_global_transform")
+end
+
+function UpdateParam1(ub, w, h, time)
+  local buffer_offset_bytes = 128
+  gh_gpu_buffer.set_value_4f(ub, buffer_offset_bytes, w, h, time, 0)
+end
+
+
+local ub_size = 1024
+ub1 = gh_gpu_buffer.create("UNIFORM", "NONE", ub_size, "")
+gh_gpu_buffer.bind(ub1)
+gh_gpu_buffer.map(ub1)
+
+
+UpdateCameraTransform(ub1, camera_ortho)
+
+
+
+-----------------------------------------------------------------------
+--
+local vertex_shader = demo_dir .. "spirv/s01-vs.spv"
+local pixel_shader = demo_dir .. "spirv/s03-ps.spv"
+shadertoy_shader = gh_gpu_program.vk_create_from_spirv_module_file("shadertoy_shader",   vertex_shader, "main",     pixel_shader, "main",    "", "",    "", "",     "", "",    "", "") 
+
+
+
+
+
+-----------------------------------------------------------------------
+--
+local PF_U8_RGBA = 3
+tex0 = gh_texture.create_from_file_v5(demo_dir .. "data/tex02.jpg", PF_U8_RGBA)
+
+
+-----------------------------------------------------------------------
+--
+local anisotropy = 1.0
+sampler = gh_renderer.texture_sampler_create("LINEAR", "WRAP", anisotropy, 0)
+
+
+
+
+
+
+-----------------------------------------------------------------------
+--
+ds = gh_renderer.vk_descriptorset_create()
+ub_binding_point = 0
+gh_renderer.vk_descriptorset_add_resource_gpu_buffer(ds, ub1, ub_binding_point, VK_SHADER_STAGE_VERTEX | VK_SHADER_STAGE_FRAGMENT)
+
+tex_binding_point = 1
+tex_res_index = gh_renderer.vk_descriptorset_add_resource_texture(ds, tex0, sampler, tex_binding_point, VK_SHADER_STAGE_FRAGMENT)
+
+-- local constant_size_bytes = 4
+-- local constant_offset_bytes = 0
+-- gh_renderer.vk_descriptorset_add_push_constant_range(ds, constant_size_bytes, constant_offset_bytes, VK_SHADER_STAGE_FRAGMENT)
+
+gh_renderer.vk_descriptorset_build(ds)
+gh_renderer.vk_descriptorset_update(ds)
+
+
+
+
+
+
+-----------------------------------------------------------------------
+--
+pso01 = gh_renderer.pipeline_state_create("pso01", shadertoy_shader, "")
+gh_renderer.pipeline_state_set_attrib_4i(pso01, "DEPTH_TEST", 1, 0, 0, 0)
+gh_renderer.pipeline_state_set_attrib_4i(pso01, "FILL_MODE", POLYGON_MODE_SOLID, 0, 0, 0)
+gh_renderer.pipeline_state_set_attrib_4i(pso01, "PRIMITIVE_TYPE", PRIMITIVE_TRIANGLE, 0, 0, 0)
+gh_renderer.pipeline_state_set_attrib_4i(pso01, "CULL_MODE", POLYGON_FACE_NONE, 0, 0, 0)
+gh_renderer.pipeline_state_set_attrib_4i(pso01, "CCW", 0, 0, 0, 0)
+
+pso_valid = gh_renderer.vk_pipeline_state_build(pso01, ds)
+if (pso_valid == 0) then
+	print("ERROR: pipeline state pso01 is not valid.")
+end
+
+
+
+
+
+
+-----------------------------------------------------------------------
+--
+mesh = gh_mesh.create_quad(winW, winH)
+gh_mesh.set_vertices_color(mesh, 1.0, 1.0, 1.0, 1.0)
+
+UpdateObjectTransform(ub1, mesh)
+
+
+
+
+
+
+-----------------------------------------------------------------------
+--
+kx_init_end()
+
+
+
+
+		]]></raw_data>
+	</script> 
+	
+	
+
+	
+	<script name="terminate_scene" run_mode="TERMINATE" >
+		<raw_data><![CDATA[	
+
+gh_gpu_buffer.unmap(ub1)
+kx_terminate()
+
+		]]></raw_data>
+	</script> 
+	
+	
+	
+  
+	<script name="update_scene" run_mode="FRAME" >
+		<raw_data><![CDATA[	
+
+-----------------------------------------------------------------------
+kx_frame_begin(0.2, 0.2, 0.2)
+-----------------------------------------------------------------------
+
+
+local elapsed_time = kx_gettime()
+
+
+if (pso_valid == 1) then
+
+  gh_renderer.vk_descriptorset_bind(ds)
+  gh_renderer.pipeline_state_bind(pso01)
+
+  UpdateParam1(ub1, winW, winH, elapsed_time)
+  
+  gh_object.render(mesh)
+
+end
+
+
+
+
+-----------------------------------------------------------------------
+kx_frame_end(1)
+-----------------------------------------------------------------------
+
+
+		]]></raw_data>
+	</script> 
+	
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+kx_resize()
+
+UpdateCameraTransform(ub1, camera_ortho)
+gh_mesh.update_quad_size(mesh, winW, winH)
+
+		]]></raw_data>
+	</script> 
+  
+  
+</glsl_hacker>
