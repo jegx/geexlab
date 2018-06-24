@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+
+<!--
+This demo shows how to render a mesh with a PN Triangle tesselation shader.
+-->
+
+
+<glsl_hacker>
+	
+  <window name="win3d01" title="ImGui > Lot of Windows > Vulkan" 
+          width="1280" height="720" resizable="1" menubar="1" 
+          separate_render_thread="1" gpu_index="0"
+          renderer_type="Vulkan" vsync="0" />
+  
+  
+	<script name="init_scene" run_mode="INIT" >
+		<raw_data><![CDATA[	
+   
+    
+local lib_dir = gh_utils.get_scripting_libs_dir()
+dofile(lib_dir .. "lua/imgui.lua")    
+
+
+    
+winW, winH = gh_window.getsize(0)
+
+
+-----------------------------------------------------------------------
+--
+
+cmd = gh_renderer.command_list_create(0)
+
+
+bkg_color = {r=0.2, g=0.2, b=0.2, a=1.0}
+
+
+
+
+
+os_info = gh_utils.get_os_info()
+renderer_model = gh_renderer.get_renderer_model()
+api_name = gh_renderer.get_api_name()
+api_version = gh_renderer.get_api_version()
+imgui_version = gh_imgui.get_version()
+
+local app_version_major, app_version_minor, app_version_patch, app_version_build = gh_utils.get_app_version()
+geexlab_version_str = string.format("%d.%d.%d.%d",  app_version_major, app_version_minor, app_version_patch, app_version_build)
+
+imgui_can_show_metrics_window = 0
+if ((app_version_major >= 0) and (app_version_minor >= 25) and (app_version_patch >= 2)) then
+  imgui_can_show_metrics_window = 1
+end  
+
+
+		]]></raw_data>
+	</script> 
+	
+	
+
+	
+	<script name="terminate_scene" run_mode="TERMINATE" >
+		<raw_data><![CDATA[	
+
+gh_imgui.terminate()
+
+
+		]]></raw_data>
+	</script> 
+	
+	
+	
+  
+	<script name="update_scene" run_mode="FRAME" >
+		<raw_data><![CDATA[	
+   
+    
+    
+local elapsed_time = gh_utils.get_elapsed_time()
+    
+gh_renderer.command_list_open(cmd)
+
+gh_renderer.clear_color_depth_buffers(bkg_color.r, bkg_color.g, bkg_color.b, bkg_color.a, 1.0)
+
+gh_renderer.vk_command_list_render_pass_begin(cmd, 0)
+   
+
+
+gh_renderer.set_viewport_scissor(0, 0, winW, winH)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------
+-- ImGui begin -------------------------------------------------------------
+--
+imgui_frame_begin()
+
+
+
+
+
+
+-- Flags for window style, window position and window size.
+--
+local pos_size_flag_always = 1 -- Always set the pos and/or size
+local pos_size_flag_once = 2 -- Set the pos and/or size once per runtime session (only the first call with succeed)
+local pos_size_flag_first_use_ever = 4  -- Set the pos and/or size if the window has no saved data (if doesn't exist in the .ini file)
+local pos_size_flag_appearing = 8  -- Set the pos and/or size if the window is appearing after being hidden/inactive (or the first time)
+
+ImGuiWindowFlags_NoResize = 2 -- Disable user resizing with the lower-right grip
+ImGuiWindowFlags_NoMove = 4 -- Disable user moving the window
+local window_flags = 6
+
+local window_width = 100
+local window_height = 100
+local num_windows_y = (winH / window_height) + 1
+local num_windows_x = (winW / window_width) + 1
+local window_counter = 0
+
+local posy = 5
+
+for y=1, num_windows_y do
+  
+  local posx = 5
+
+  for x=1, num_windows_x do
+
+    window_counter = window_counter + 1
+    local window_name = "window " .. window_counter
+
+    gh_imgui.window_begin(window_name, window_width, window_height, posx, posy, window_flags, pos_size_flag_always, pos_size_flag_always)
+    local time_str = string.format("%.1f sec", elapsed_time + window_counter)
+    gh_imgui.text_rgba("GeeXLab", 1.0, 1.0, 0.0, 1.0)
+    gh_imgui.text_rgba("Vulkan", 1.0, 0.4, 0.1, 1.0)
+    gh_imgui.text_rgba("> " .. time_str, 0.4, 0.6, 0.8, 1.0)
+    for k=1, 4 do
+      local x = window_counter + k
+      gh_imgui.text_rgba("K::" .. x, 0.4, 0.6, 0.8, 1.0)
+    end
+    gh_imgui.window_end()
+
+    posx = posx + window_width + 5
+
+  end
+
+  posy = posy + window_height + 5
+
+end
+
+
+
+
+
+
+--[[
+imgui_window_begin_v1("Control panel", 380, 150, 50, 50)
+  gh_imgui.text("Press [ESC] to quit the demo")
+
+  imgui_vertical_space()
+  imgui_vertical_space()
+
+  gh_imgui.text("Background color")
+  bkg_color.r, bkg_color.g, bkg_color.b, bkg_color.a = gh_imgui.color_edit_rgba("##colorpicker-Bgcolor", bkg_color.r, bkg_color.g, bkg_color.b, bkg_color.a)
+imgui_window_end()
+--]]
+
+
+
+
+imgui_window_begin_v1("GeeXLab test", 400, 200, 80, 150)
+  gh_imgui.text("GeeXLab " .. geexlab_version_str)
+  local time_str = string.format("%.1f sec", elapsed_time)
+  gh_imgui.text_rgba("Time: " .. time_str, 0.8, 0.8, 0.8, 1.0)
+  gh_imgui.text_rgba("Renderer: " .. renderer_model, 1.0, 1.0, 0.0, 1.0)
+  gh_imgui.text_rgba("3D API: " .. api_name .. " " .. api_version, 1.0, 0.7, 0.0, 1.0)
+  --gh_imgui.text("OS: " .. os_info)
+  gh_imgui.text_rgba("ImGui version: " .. imgui_version, 0.7, 0.7, 0.7, 1.0)
+gh_imgui.window_end()
+
+
+if (imgui_can_show_metrics_window) then
+  gh_imgui.show_metrics_window()
+end
+
+
+
+imgui_frame_end()
+--
+-- ImGui end ---------------------------------------------------------------
+----------------------------------------------------------------------------
+
+
+
+
+
+gh_renderer.vk_command_list_render_pass_end(cmd)
+gh_renderer.command_list_close(cmd)
+gh_renderer.command_list_execute(cmd)
+
+
+
+
+
+		]]></raw_data>
+	</script> 
+	
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+
+		]]></raw_data>
+	</script> 
+  
+  
+</glsl_hacker>
