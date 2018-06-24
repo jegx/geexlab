@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+	
+  <window name="win3d01" title="Simple 2D grid (GL3.2+)" 
+          width="600" height="600" 
+          gl_version_major="3" gl_version_minor="2" />
+          
+  
+	<script name="init_scene" run_mode="INIT" >
+		<raw_data><![CDATA[	
+
+local lib_dir = gh_utils.get_scripting_libs_dir()     
+dofile(lib_dir .. "lua/imgui.lua")    
+
+gh_renderer.set_vsync(1)
+
+winW, winH = gh_window.getsize(0)
+
+grid_prog = gh_node.getid("grid_prog")
+
+
+grid_scale = 261.0
+grid_res = 0.05
+
+		]]></raw_data>
+	</script> 
+
+
+
+
+  <script name="kill" run_mode="TERMINATE" >
+    <raw_data><![CDATA[ 
+
+gh_imgui.terminate()
+
+    ]]></raw_data>
+  </script> 
+
+
+
+
+
+  
+	<script name="update_scene" run_mode="FRAME" >
+		<raw_data><![CDATA[	
+
+local elapsed_time = gh_utils.get_elapsed_time()
+    
+
+local PRIMITIVE_TRIANGLE = 0
+local PRIMITIVE_TRIANGLE_STRIP = 1
+local PRIMITIVE_LINE = 2
+local PRIMITIVE_LINE_STRIP = 3
+local PRIMITIVE_LINE_LOOP = 4
+local PRIMITIVE_LINE_ADJACENCY = 5
+local PRIMITIVE_LINE_STRIP_ADJACENCY = 6
+local PRIMITIVE_PATCH = 7
+local PRIMITIVE_POINT = 8
+
+
+
+
+   
+ 
+gh_renderer.set_viewport(0, 0, winW, winH)
+gh_renderer.clear_color_depth_buffers(0.4, 0.4, 0.4, 1.0, 1.0)
+
+
+
+
+gh_gpu_program.bind(grid_prog)
+gh_gpu_program.gpu_uniform4f(grid_prog, "params", grid_scale, grid_res, 0.0, 0.0)
+
+
+-- Rendering of the postfx fullscreen quad.
+-- Attributeless rendering.
+gh_renderer.draw_primitives(PRIMITIVE_TRIANGLE_STRIP, 0, 4)
+
+
+
+
+
+
+
+
+imgui_frame_begin()
+gh_imgui.set_color(IMGUI_WINDOW_BG_COLOR, 0.1, 0.1, 0.1, 0.6)
+local is_open = imgui_window_begin_v1("Demo controls", 300, 200, 20, 20)
+if (is_open == 1) then
+          
+  gh_imgui.text_rgba("GLSL 2D grid", 1.0, 1.0, 0.0, 1.0)
+  gh_imgui.text("Press [ESC] to quit the demo")
+
+  imgui_vertical_space()
+  imgui_vertical_space()
+
+  gh_imgui.text("Grid scale")
+  grid_scale = gh_imgui.slider_1f("##slider01", grid_scale, 1.0, 1000.0, 1)
+  gh_imgui.text("Grid resolution")
+  grid_res = gh_imgui.slider_1f("##slider02", grid_res, 0.0, 1.0, 1)
+
+end 
+imgui_window_end()
+imgui_frame_end()
+
+
+
+
+
+		]]></raw_data>
+	</script> 
+	
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+
+
+		]]></raw_data>
+	</script> 
+
+
+
+
+
+  <gpu_program name="grid_prog" >
+    <raw_data_vs><![CDATA[   
+#version 150
+
+out vec4 v_uv;
+
+const vec2[] pos = vec2[4](
+  vec2(-1.0, 1.0),
+  vec2(-1.0, -1.0),
+  vec2(1.0, 1.0),
+  vec2(1.0, -1.0)
+);
+
+const vec2[] uv = vec2[4](
+  vec2(0.0, 1.0), // top-left
+  vec2(0.0, 0.0), // bottom-left
+  vec2(1.0, 1.0), // top-right
+  vec2(1.0, 0.0)  // bottom-right
+);
+
+void main()
+{
+  gl_Position = vec4(pos[gl_VertexID], 0.0, 1.0);
+  v_uv = vec4(uv[gl_VertexID], 0.0, 1.0);
+}
+  ]]></raw_data_vs>
+    <raw_data_ps><![CDATA[   
+#version 150
+in vec4 v_uv;
+out vec4 FragColor;
+
+uniform vec4 params;
+
+// adapted from https://thebookofshaders.com/edit.php#10/ikeda-simple-grid.frag
+
+float grid(vec2 st, float res)
+{
+  vec2 grid = fract(st*res);
+  return (step(res,grid.x) * step(res,grid.y));
+}
+
+void main()
+{
+  vec2 grid_uv = v_uv.xy * params.x; // scale
+  float x = grid(grid_uv, params.y); // resolution
+  FragColor.rgb = vec3(0.5) * x;  
+  FragColor.a = 1.0;
+}
+    ]]></raw_data_ps>
+  </gpu_program>
+
+
+
+
+
+  
+  
+</glsl_hacker>
