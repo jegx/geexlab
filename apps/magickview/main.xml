@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+
+  
+	
+  <window name="win3d01" title="MagickView"
+          width="1280" height="720"
+          gl_version_major="2" gl_version_minor="0" vsync="1" />
+  
+
+
+
+  <script name="init" run_mode="INIT" filename="lua/init.lua" />
+
+  <script name="frame" run_mode="FRAME" filename="lua/frame.lua" />
+
+  <script name="drag_n_drop" run_mode="DRAG_N_DROP" filename="lua/dnd.lua" />
+
+  
+
+
+
+
+  <script name="terminate_scene" run_mode="TERMINATE" >
+    <raw_data><![CDATA[ 
+
+if (tex0 > 0) then 
+  gh_imagemagick.texture_cleanup(tex0)
+end  
+
+gh_imgui.terminate()
+
+    ]]></raw_data>
+  </script> 
+  
+
+
+
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+
+gh_camera.update_ortho(camera_ortho, -winW/2, winW/2, -winH/2, winH/2, 1.0, 10.0)
+gh_camera.set_viewport(camera_ortho, 0, 0, winW, winH)
+
+--UpdateQuadSize()
+
+		]]></raw_data>
+	</script> 
+  
+  
+</glsl_hacker>
