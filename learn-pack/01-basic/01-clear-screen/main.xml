@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+	
+
+
+  <window name="win3d01" title="Clear screen" 
+  	      width="800" height="400" resizable="1"
+          gl_version_major="2" gl_version_minor="1" />
+  
+
+
+  
+	<script name="init_scene" run_mode="INIT" >
+		<raw_data><![CDATA[	
+    
+winW, winH = gh_window.getsize(0)
+
+		]]></raw_data>
+	</script> 
+  
+
+
+
+	<script name="update_scene" run_mode="FRAME" >
+		<raw_data><![CDATA[	
+
+gh_renderer.set_viewport(0, 0, winW, winH)
+gh_renderer.clear_color_buffer(0.0, 0.4, 0.2, 1.0)
+
+		]]></raw_data>
+	</script> 
+
+
+
+	
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+
+		]]></raw_data>
+	</script> 
+
+
+  
+  
+</glsl_hacker>
