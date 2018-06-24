@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+	
+  <window name="win3d01" title="Simple Line" width="800" height="400"
+          gl_version_major="2" gl_version_minor="1" msaa="Off" />
+  
+  
+  
+  
+	<script name="init_scene" run_mode="INIT" >
+		<raw_data><![CDATA[	
+    
+
+
+winW, winH = gh_window.getsize(0)
+
+
+
+font = gh_utils.font_create("Tahoma", 14)
+
+
+
+
+-- A camera with orhographic projection is perfect for 2D rendering.
+--
+camera_ortho = gh_camera.create_ortho(-winW/2, winW/2, -winH/2, winH/2, 1.0, 10.0)
+gh_camera.set_viewport(camera_ortho, 0, 0, winW, winH)
+gh_camera.set_position(camera_ortho, 0, 0, 4)
+
+
+
+
+-- Our first GPU program: a simple color program. The source code of the GPU program 
+-- can be found at the end of this demo.
+--
+color_prog = gh_node.getid("color_prog")
+
+
+
+
+-- A line!
+--
+local LINE_RENDER_DEFAULT = 0 
+local LINE_RENDER_STRIP = 1 
+local LINE_RENDER_LOOP = 2
+local num_vertices = 2
+line = gh_polyline.create_v2(num_vertices, LINE_RENDER_DEFAULT)
+
+
+
+-- Misc render states.
+--
+gh_renderer.set_vsync(1)
+gh_renderer.set_depth_test_state(1)
+
+--gh_renderer.enable_state("GL_MULTISAMPLE")
+
+
+		]]></raw_data>
+	</script> 
+  
+	<script name="update_scene" run_mode="FRAME" >
+		<raw_data><![CDATA[	
+
+local elapsed_time = gh_utils.get_elapsed_time()
+
+gh_camera.bind(camera_ortho)
+
+gh_renderer.clear_color_depth_buffers(0.2, 0.2, 0.2, 1.0, 1.0)
+
+
+
+gh_gpu_program.bind(color_prog)
+
+
+
+local r=0.0
+local g=0.0
+local b=0.0
+local a=1.0
+
+
+
+-- Renders a red line
+--
+r=1.0
+g=0.0
+b=0.0
+gh_gpu_program.uniform4f(color_prog, "color", r, g, b, a)
+gh_polyline.set_vertex_position(line, 0, -80, -80, 0, 1)
+gh_polyline.set_vertex_position(line, 1, 80, 80, 0, 1)
+gh_object.render(line)
+
+-- Renders a green line
+--
+r=0.0
+g=1.0
+b=0.0
+gh_gpu_program.uniform4f(color_prog, "color", r, g, b, a)
+gh_polyline.set_vertex_position(line, 0, -40, -80, 0, 1)
+gh_polyline.set_vertex_position(line, 1, 80, 0, 0, 1)
+gh_object.render(line)
+
+
+
+gh_utils.font_render(font, 10, 20, 1.0, 1.0, 0.0, 1.0, "Simple lines")
+
+
+		]]></raw_data>
+	</script> 
+	
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+
+
+
+-- This how we resize an orthographic camera.
+--
+gh_camera.update_ortho(camera_ortho, -winW/2, winW/2, -winH/2, winH/2, 1.0, 10.0)
+gh_camera.set_viewport(camera_ortho, 0, 0, winW, winH)
+
+
+
+gh_utils.font_set_viewport_info(font, 0, 0, winW, winH)
+
+		]]></raw_data>
+	</script> 
+
+
+
+
+
+<!--
+	One of the most simple GPU programs.
+-->	
+  <gpu_program name="color_prog" >
+    <raw_data_vs><![CDATA[	 
+#version 120
+void main()
+{
+	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;		
+}
+  ]]></raw_data_vs>
+    <raw_data_ps><![CDATA[	 
+#version 120
+uniform vec4 color;
+void main (void)
+{
+  gl_FragColor = color;
+}
+    ]]></raw_data_ps>
+  </gpu_program>
+  
+
+
+
+
+  
+  
+</glsl_hacker>
+
