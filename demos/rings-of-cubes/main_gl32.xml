@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+	
+    <window name="win3d01" title="Demo template" 
+          width="1280" height="720" 
+          gl_version_major="3" gl_version_minor="2" />
+
+
+  
+	<script name="init_scene" run_mode="INIT" filename="init.lua"  />
+
+  <script name="frame" run_mode="FRAME" filename="frame.lua" update_from_file_every_frame="1" />
+
+	<script name="resize_scene" run_mode="SIZE" filename="resize.lua" />
+  
+	<script name="terminate_scene" run_mode="TERMINATE" filename="terminate.lua" />
+
+  
+  
+  
+
+
+  <gpu_program name="lighting_prog" 
+               filename_vs="assets/shaders/lighting_prog_vs_gl32.glsl" livecoding_from_file_vs="1" 
+               filename_ps="assets/shaders/lighting_prog_ps_gl32.glsl" livecoding_from_file_ps="1" />
+
+               
+               
+               
+               
+  
+  <gpu_program name="color_prog" >
+    <raw_data_vs><![CDATA[	 
+#version 150
+in vec4 gxl3d_Position;
+in vec4 gxl3d_Color;
+uniform mat4 gxl3d_ModelViewProjectionMatrix;
+
+out Vertex
+{
+  vec4 color;
+} vertex;
+
+void main()
+{
+  gl_Position = gxl3d_ModelViewProjectionMatrix * gxl3d_Position;
+  vertex.color =  gxl3d_Color;
+}
+  ]]></raw_data_vs>
+
+  <raw_data_ps><![CDATA[	 
+#version 150
+in Vertex
+{
+  vec4 color;
+} vertex;
+
+out vec4 FragColor;
+void main()
+{
+  FragColor = vertex.color;
+}
+    ]]></raw_data_ps>
+  </gpu_program>
+  
+  
+  
+</glsl_hacker>
