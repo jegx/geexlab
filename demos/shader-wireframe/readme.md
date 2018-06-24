@@ -1,6 +1,4 @@
-===================================================================
-Wireframe shader demo
-===================================================================
+<h2>Wireframe shader demo</h2>
 
 Wireframe shader based on a geometry shader. This shader supports indexed meshes. 
 
