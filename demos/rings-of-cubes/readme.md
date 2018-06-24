@@ -4,11 +4,7 @@ Article:
 https://www.geeks3d.com/hacklab/20180622/demo-rings-of-cubes/
 
 
-Screenshots:
-
-<p align="center">
-  <img src="https://github.com/jegx/geexlab/blob/master/demos/rings-of-cubes/geexlab-rings-demo-32-cubes-16-rings.jpg" />
-</p>
+<b>Screenshots:</b>
 
 ![alt text](https://github.com/jegx/geexlab/blob/master/demos/rings-of-cubes/geexlab-rings-demo-32-cubes-16-rings.jpg)
 
