@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+	
+  <window name="win3d01" title="RGB Triangle" width="800" height="500"
+          gl_version_major="2" gl_version_minor="1" />
+  
+  
+  
+  
+	<script name="init_scene" run_mode="INIT" >
+		<raw_data><![CDATA[	
+    
+
+
+winW, winH = gh_window.getsize(0)
+
+
+
+font = gh_utils.font_create("Tahoma", 14)
+
+
+
+
+-- A camera with orhographic projection is perfect for 2D rendering.
+--
+camera_ortho = gh_camera.create_ortho(-winW/2, winW/2, -winH/2, winH/2, 1.0, 10.0)
+gh_camera.set_viewport(camera_ortho, 0, 0, winW, winH)
+gh_camera.set_position(camera_ortho, 0, 0, 4)
+
+
+
+
+-- A vertex color GPU program.
+--
+vertex_color_prog = gh_node.getid("vertex_color_prog")
+
+
+
+
+
+
+-- A triangle.
+--
+triangle = gh_mesh.create_triangle()
+
+-- By default, the vertices of the triangle are positionned in the range [-1.0; +1.0].
+-- So let's scale them a little bit.
+--
+gh_mesh.set_vertex_position(triangle, 0, -200, -200, 0, 1)
+gh_mesh.set_vertex_position(triangle, 1, 0, 200, 0, 1)
+gh_mesh.set_vertex_position(triangle, 2, 200, -200, 0, 1)
+
+-- Change the color of the three vertices
+--
+local r = 0
+local g = 0
+local b = 0
+local a = 0 -- alpha (not used in this demo)
+
+-- red vertex
+r = 1
+g = 0
+b = 0
+gh_mesh.set_vertex_color(triangle, 0, r, g, b, a)
+
+-- green vertex
+r = 0
+g = 1
+b = 0
+gh_mesh.set_vertex_color(triangle, 1, r, g, b, a)
+
+
+-- blue vertex
+r = 0
+g = 0
+b = 1
+gh_mesh.set_vertex_color(triangle, 2, r, g, b, a)
+
+
+
+
+
+
+
+-- Misc render states.
+--
+gh_renderer.set_vsync(1)
+gh_renderer.set_depth_test_state(1)
+
+
+		]]></raw_data>
+	</script> 
+  
+	<script name="update_scene" run_mode="FRAME" >
+		<raw_data><![CDATA[	
+
+local elapsed_time = gh_utils.get_elapsed_time()
+
+
+
+gh_camera.bind(camera_ortho)
+
+gh_renderer.set_depth_test_state(0)
+gh_renderer.clear_color_depth_buffers(0.2, 0.2, 0.2, 1.0, 1.0)
+
+
+
+gh_gpu_program.bind(vertex_color_prog)
+gh_object.render(triangle)
+
+
+
+
+gh_utils.font_render(font, 10, 20, 1.0, 1.0, 0.0, 1.0, "RGB Triangle")
+
+
+		]]></raw_data>
+	</script> 
+	
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+
+
+
+-- This how we resize an orthographic camera.
+--
+gh_camera.update_ortho(camera_ortho, -winW/2, winW/2, -winH/2, winH/2, 1.0, 10.0)
+gh_camera.set_viewport(camera_ortho, 0, 0, winW, winH)
+
+
+
+gh_utils.font_set_viewport_info(font, 0, 0, winW, winH)
+
+		]]></raw_data>
+	</script> 
+
+
+
+
+
+<!--
+	One of the most simple GPU programs.
+	gl_Color is the color of a vertex.
+-->	
+  <gpu_program name="vertex_color_prog" >
+    <raw_data_vs><![CDATA[	 
+#version 120
+varying vec4 v_color;
+void main()
+{
+	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;		
+	v_color = gl_Color;
+}
+  ]]></raw_data_vs>
+    <raw_data_ps><![CDATA[	 
+#version 120
+varying vec4 v_color;
+void main (void)
+{
+  gl_FragColor = v_color;
+}
+    ]]></raw_data_ps>
+  </gpu_program>
+  
+
+
+
+
+  
+  
+</glsl_hacker>
