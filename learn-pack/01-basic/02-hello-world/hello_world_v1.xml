@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+
+  <window name="win3d01" title="Hello World!" 
+  	      width="700" height="200" />
+  
+  
+	<script name="init_scene" run_mode="INIT" >
+		<raw_data><![CDATA[	
+    
+font = gh_utils.font_create("Tahoma", 14)
+
+		]]></raw_data>
+	</script> 
+  
+
+
+	<script name="update_scene" run_mode="FRAME" >
+		<raw_data><![CDATA[	
+
+gh_renderer.clear_color_buffer(0.4, 0.4, 0.4, 1.0)
+
+x = 10
+y = 20
+gh_utils.font_render(font, x, y, 1.0, 1.0, 0.0, 1.0, "Hello World from GeeXLab!")
+
+x = 10
+y = 40
+elapsed_time = gh_utils.get_elapsed_time()
+gh_utils.font_render(font, x, y, 1.0, 1.0, 1.0, 1.0, "Elapsed time: " .. elapsed_time)
+
+		]]></raw_data>
+	</script> 
+
+
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+gh_utils.font_set_viewport_info(font, 0, 0, winW, winH)
+
+		]]></raw_data>
+	</script> 
+ 
+  
+</glsl_hacker>

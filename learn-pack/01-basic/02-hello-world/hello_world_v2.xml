@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+	
+
+
+  <window name="win3d01" title="Simple text" 
+  	      width="800" height="400" resizable="1"
+          gl_version_major="2" gl_version_minor="1" />
+  
+
+
+  
+	<script name="init_scene" run_mode="INIT" >
+		<raw_data><![CDATA[	
+    
+-- Gets the size of the 3D window. 
+-- winW, winH are global.
+--
+winW, winH = gh_window.getsize(0)
+
+
+
+-- A font for displaying some information.
+-- This kind of font works only with OpenGL 2.1
+-- or OpenGL 3.2+ with compatibility profile. This font
+-- does not work on macOS with OpenGL 3.2+ because macOS
+-- uses core profile. Look at gh_font lib for better font support
+-- (an example is available in learn/01-basic/text-ttf-font/ folder 
+-- of the code sample pack).
+--
+font = gh_utils.font_create("Tahoma", 14)
+
+
+		]]></raw_data>
+	</script> 
+  
+
+
+
+	<script name="update_scene" run_mode="FRAME" >
+		<raw_data><![CDATA[	
+
+local elapsed_time = gh_utils.get_elapsed_time()
+
+
+-- Clear the background with an uniform color.
+-- Each channel of an RGB color ranges from 0.0 to 1.0. 
+-- Some examples:
+--  white color = [1.0, 1.0, 1.0]
+--  red color =   [1.0, 0.0, 0.0]
+--  green color = [0.0, 1.0, 0.0]
+--  bleu color =  [0.0, 0.0, 1.0]
+--
+gh_renderer.clear_color_buffer(0.0, 0.2, 0.2, 1.0)
+
+
+-- Font position is relative to screen coordinates. The position (0, 0) is the top-left corner.
+-- The position of the center of the screen is (screen_width/2, screen_height/2)
+--
+local x = 10
+local y = 100
+
+gh_utils.font_render(font, x, y, 0.2, 1.0, 0.0, 1.0, "Hello World from GeeXLab!")
+gh_utils.font_render(font, 10, y+40, 0.6, 0.6, 0.6, 1.0, string.format("Elapsed time: %.3f sec.", elapsed_time))
+
+gh_utils.font_render(font, 10, y+60, 0.9, 0.5, 0.1, 1.0, string.format("Window size: %d x %d", winW, winH))
+
+
+
+-- Move a text around the screen center
+--
+x = winW/2 + 20 * math.sin(elapsed_time * 2.0)
+y = winH/2 + 20 * math.cos(elapsed_time * 2.0)
+gh_utils.font_render(font, x, y, 1.0, 1.0, 0.1, 1.0, string.format("<x:%.0f - y:%.0f>", x, y))
+
+
+
+-- Text at the four corners of the screen.
+--
+
+x = 5
+y = 0
+gh_utils.font_render(font, x, y, 1.0, 1.0, 0.1, 1.0, string.format("[x:%.0f - y:%.0f]", x-5, y))
+
+x = winW-85
+y = 0
+gh_utils.font_render(font, x, y, 1.0, 1.0, 0.1, 1.0, string.format("[x:%.0f - y:%.0f]", x+85, y))
+
+x = winW-105
+y = winH-20
+gh_utils.font_render(font, x, y, 1.0, 1.0, 0.1, 1.0, string.format("[x:%.0f - y:%.0f]", x+105, y+20))
+
+x = 5
+y = winH-20
+gh_utils.font_render(font, x, y, 1.0, 1.0, 0.1, 1.0, string.format("[x:%.0f - y:%.0f]", x-5, y+20))
+
+		]]></raw_data>
+	</script> 
+
+
+
+	
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+gh_utils.font_set_viewport_info(font, 0, 0, winW, winH)
+
+		]]></raw_data>
+	</script> 
+
+
+  
+  
+</glsl_hacker>
