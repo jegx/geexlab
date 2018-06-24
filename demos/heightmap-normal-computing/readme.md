@@ -5,7 +5,8 @@ Article
 - https://www.geeks3d.com/hacklab/20180424/demo-heightmap-normal-computing/
 
 
-<b>Screeshots</b>
+
+<b>Screenshots</b>
 
 ![alt text](https://github.com/jegx/geexlab/blob/master/demos/heightmap-normal-computing/screenshots/geexlab-heightmap-normal-computing-demo-01.jpg)
 
