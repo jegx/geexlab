@@ -1,5 +1,11 @@
 Here is a small image viewer coded in <b>Lua</b> that uses <b>PhysX 3</b> to display an image on an animated flag.
 
+Load this demo with GeeXLab and drag-and-drop any image into the main window.
+
+This demo requires GeeXLab 0.25.3.0+
+<br>
+https://www.geeks3d.com/geexlab/downloads/
+
 Article:
 <br>
 https://www.geeks3d.com/hacklab/20180614/demo-image-viewer-with-physx-3/
