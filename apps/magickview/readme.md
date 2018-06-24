@@ -14,7 +14,6 @@ MagickView requires GeeXLab:
 Related articles:
 <br>
 - https://www.geeks3d.com/hacklab/20180608/how-to-read-exif-data-with-imagemagick-plugin/
-<br>
 - https://www.geeks3d.com/hacklab/20180402/list-of-image-formats-supported-by-the-imagemagick-plugin/
 
 
