@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+<!--
+          render_timer_interval="-1" separate_render_thread="1"
+-->
+  <window name="win3d01" title="Heightmap Normal Computing" 
+          width="800" height="480" 
+          gl_version_major="3" gl_version_minor="2" />
+
+          
+  
+	<script name="init_scene" run_mode="INIT" >
+		<raw_data><![CDATA[	
+
+lib_dir = gh_utils.get_scripting_libs_dir() 		
+dofile(lib_dir .. "lua/gx_cam_lib_v1.lua")
+
+
+print("Initializing demo...")
+
+
+winW, winH = gh_window.getsize(0)
+
+font_a = gh_utils.font_create("Tahoma", 14)
+
+
+
+camera = gx_camera.create_perspective(60, 1, 0, 0, winW, winH, 0.1, 1000)
+gh_camera.set_position(camera, 0, 5, 20) 
+camera_lookat_x = 0
+camera_lookat_y = 0
+camera_lookat_z = 0
+gx_camera.init_orientation(camera, camera_lookat_x, camera_lookat_y, camera_lookat_z, 30, 70)
+--gx_camera.set_mode_fly()
+gx_camera.set_mode_orbit()
+orbit_mode = 1
+keyboard_speed = 10.0
+camera_fov = 60.0
+gx_camera.set_orbit_lookat(camera, camera_lookat_x, camera_lookat_y, camera_lookat_z)
+gx_camera.set_keyboard_speed(keyboard_speed)
+
+
+
+
+
+
+color_prog = gh_node.getid("color_prog")
+
+light_prog = gh_node.getid("light_prog")
+gh_gpu_program.uniform4f(light_prog, "light_position", 5.0, 20.0, 30.0, 1.0)
+
+
+
+
+mesh = gh_mesh.create_plane(20, 20, 100, 100)
+
+--gh_object.compute_faces_normal(mesh)
+--gh_object.compute_vertices_normal(mesh)
+
+gh_object.set_position(mesh, 0, 0, 0)
+
+
+num_vertices = gh_object.get_num_vertices(mesh)
+num_faces = gh_object.get_num_faces(mesh)
+
+gh_mesh.set_vertices_color(mesh, 1, 1, 1, 1)
+
+
+
+light_sphere = gh_utils.sphere_create(0.25, 10, 1, 1, 1, 1)
+
+
+
+
+
+
+grid = gh_utils.grid_create()
+gh_utils.grid_set_geometry_params(grid, 20, 20, 20, 20)
+gh_utils.grid_set_lines_color(grid, 0.3, 0.3, 0.3, 1.0)
+gh_utils.grid_set_main_lines_color(grid, 1.0, 1.0, 0.0, 1.0)
+gh_utils.grid_set_main_x_axis_color(grid, 1.0, 0.0, 0.0, 1.0)
+gh_utils.grid_set_main_z_axis_color(grid, 0.0, 0.0, 1.0, 1.0)
+local display_main_lines = 1
+local display_lines = 1
+gh_utils.grid_set_display_lines_options(grid, display_main_lines, display_lines)
+
+
+
+gh_renderer.set_vsync(1)
+gh_renderer.set_scissor_state(0)
+
+last_time = gh_utils.get_elapsed_time()
+
+timer_counter = 0
+
+
+		]]></raw_data>
+	</script> 
+  
+  
+<!--
+	<script name="timer_scene" run_mode="TIMER" >
+		<raw_data><![CDATA[	
+timer_counter = timer_counter + 1
+--print("TIMER script called.")    
+gh_object.set_euler_angles(mesh, timer_counter, 0, 0)
+gh_object.bounding_volume_update(mesh, 0)
+
+		]]></raw_data>
+	</script> 
+-->
+
+  
+  
+  
+	<script name="update_scene" run_mode="FRAME" filename="frame.lua" livecoding="1" />
+
+  
+  
+  
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+
+local aspect = 1.333
+if (winH > 0) then
+  aspect = winW / winH
+end  
+gh_camera.update_persp(camera, 60, aspect, 0.1, 1000.0)
+gh_camera.set_viewport(camera, 0, 0, winW, winH)
+
+gh_utils.font_set_viewport_info(font_a, 0, 0, winW, winH)
+
+		]]></raw_data>
+	</script> 
+  
+
+
+  <gpu_program name="color_prog" >
+    <raw_data_vs><![CDATA[	 
+#version 150
+in vec4 gxl3d_Position;
+in vec4 gxl3d_Color;
+uniform mat4 gxl3d_ModelViewProjectionMatrix;
+
+out Vertex
+{
+  vec4 color;
+} vertex;
+
+void main()
+{
+  gl_Position = gxl3d_ModelViewProjectionMatrix * gxl3d_Position;
+  vertex.color =  gxl3d_Color;
+}
+  ]]></raw_data_vs>
+
+  <raw_data_ps><![CDATA[	 
+#version 150
+in Vertex
+{
+  vec4 color;
+} vertex;
+
+out vec4 FragColor;
+void main()
+{
+  FragColor = vertex.color;
+}
+    ]]></raw_data_ps>
+  </gpu_program>
+
+
+  
+  <gpu_program name="light_prog" filename_vs="lighting_vs.glsl"  livecoding_vs="1" 
+                                 filename_ps="lighting_ps.glsl"  livecoding_ps="1" />
+
+
+                                 
+</glsl_hacker>
