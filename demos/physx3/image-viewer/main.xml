@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+	
+  <window name="win3d01" title="PhysX 3 Image Viewer" 
+          width="1280" height="720" 
+          gl_version_major="3" gl_version_minor="2"  />
+  
+ 
+  
+  
+	<script name="init_scene" run_mode="INIT" language="LUA" filename="lua/init.lua" />
+  
+	<script name="update_scene" run_mode="FRAME" filename="lua/frame.lua" livecoding="1" />
+
+  <script name="dnd" run_mode="DRAG_N_DROP" filename="lua/dnd.lua" />
+
+	
+	<script name="terminate_scene" run_mode="TERMINATE" >
+		<raw_data><![CDATA[	
+
+gh_physx3.terminate()
+gh_imgui.terminate()
+
+		]]></raw_data>
+	</script> 
+
+
+
+  
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+
+gx_camera.update_perspective(camera, 60, 1, 0, 0, winW, winH, 0.1, 1000)
+
+		]]></raw_data>
+	</script> 
+  
+
+
+
+
+
+  <gpu_program name="phong_prog" >
+    <raw_data_vs><![CDATA[	 
+#version 150
+in vec4 gxl3d_Position;
+in vec4 gxl3d_Normal;
+in vec4 gxl3d_TexCoord0;
+out vec4 Vertex_UV;
+out vec4 Vertex_Normal;
+out vec4 Vertex_LightDir;
+out vec4 Vertex_EyeVec;
+uniform mat4 gxl3d_ModelViewProjectionMatrix; // Automatically passed by GLSL Hacker
+uniform mat4 gxl3d_ModelViewMatrix; // Automatically passed by GLSL Hacker
+uniform mat4 gxl3d_ViewMatrix; // Automatically passed by GLSL Hacker
+uniform vec4 light_position;
+uniform vec4 uv_tiling;
+void main()
+{
+  vec4 P = gxl3d_Position;
+  P.w = 1.0;
+  gl_Position = gxl3d_ModelViewProjectionMatrix * P;
+  Vertex_UV = gxl3d_TexCoord0 * uv_tiling;
+  Vertex_Normal = gxl3d_ModelViewMatrix  * gxl3d_Normal;
+  vec4 view_vertex = gxl3d_ModelViewMatrix * P;
+  vec4 lp = gxl3d_ViewMatrix * light_position;
+  Vertex_LightDir = lp - view_vertex;
+  Vertex_EyeVec = -view_vertex;
+}
+  ]]></raw_data_vs>
+    <raw_data_ps><![CDATA[	 
+#version 140
+precision highp float;
+uniform sampler2D tex0;
+uniform vec4 light_diffuse;
+uniform vec4 material_diffuse;
+uniform vec4 light_specular;
+uniform vec4 material_specular;
+uniform float material_shininess;
+uniform int use_texture;
+uniform vec4 color;
+in vec4 Vertex_UV;
+in vec4 Vertex_Normal;
+in vec4 Vertex_LightDir;
+in vec4 Vertex_EyeVec;
+out vec4 Out_Color;
+void main()
+{
+  vec4 tex01_color = vec4(1.0, 1.0, 1.0, 1.0);
+  if (use_texture == 1)
+  {
+    vec2 uv = Vertex_UV.xy;
+    uv.y *= -1.0;
+    tex01_color = texture(tex0, uv).rgba;
+  }
+  
+  vec4 final_color = vec4(0.5, 0.5, 0.5, 1.0) * tex01_color; 
+  vec4 N = normalize(Vertex_Normal);
+  vec4 L = normalize(Vertex_LightDir);
+  float lambertTerm = dot(N,L);
+  if (lambertTerm > 0.0)
+  {
+    final_color += light_diffuse * material_diffuse * lambertTerm * tex01_color;	
+    
+    vec4 E = normalize(Vertex_EyeVec);
+    vec4 R = reflect(-L, N);
+    float specular = pow( max(dot(R, E), 0.0), material_shininess);
+    final_color += light_specular * material_specular * specular;	
+  }
+
+  Out_Color.rgb = final_color.rgb * color.rgb;
+  Out_Color.a = color.a;
+}
+    ]]></raw_data_ps>
+  </gpu_program>
+  
+
+
+  
+</glsl_hacker>
