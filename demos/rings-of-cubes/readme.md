@@ -9,9 +9,9 @@ https://www.geeks3d.com/geexlab/downloads/
 
 <b>Screenshots:</b>
 
-![alt text](https://github.com/jegx/geexlab/blob/master/demos/rings-of-cubes/geexlab-rings-demo-32-cubes-16-rings.jpg)
+![alt text](https://github.com/jegx/geexlab/blob/master/demos/rings-of-cubes/screenshots/geexlab-rings-demo-32-cubes-16-rings.jpg)
 
-![alt text](https://github.com/jegx/geexlab/blob/master/demos/rings-of-cubes/geexlab-rings-demo-64-cubes-8-rings.jpg)
+![alt text](https://github.com/jegx/geexlab/blob/master/demos/rings-of-cubes/screenshots/geexlab-rings-demo-64-cubes-16-rings.jpg)
 
-![alt text](https://github.com/jegx/geexlab/blob/master/demos/rings-of-cubes/geexlab-rings-demo-64-cubes-32-rings.jpg)
+![alt text](https://github.com/jegx/geexlab/blob/master/demos/rings-of-cubes/screenshots/geexlab-rings-demo-64-cubes-32-rings.jpg)
 
