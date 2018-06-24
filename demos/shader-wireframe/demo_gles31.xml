@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+	
+  <window name="win3d01" title="Wireframe Shader (OpenGL ES 3.1)" 
+          width="800" height="600" 
+          gl_version_major="3" gl_version_minor="1" />
+  
+ 
+  
+	<script name="init_scene" run_mode="INIT" filename="init.lua" />
+  
+	<script name="update_scene" run_mode="FRAME" filename="frame.lua" livecoding="1" />
+
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+
+gx_camera.update_perspective(camera, 60, 1, 0, 0, winW, winH, 1, 1000)
+
+
+		]]></raw_data>
+	</script> 
+
+
+
+	<script name="terminate_scene" run_mode="TERMINATE" >
+		<raw_data><![CDATA[	
+
+gh_imgui.terminate()
+
+		]]></raw_data>
+	</script> 
+
+
+
+
+
+
+  <gpu_program name="wireframe_prog"
+    filename_gs="shaders/gles3_gs.glsl" livecoding_from_file_gs="1"
+    filename_ps="shaders/gles3_ps.glsl" livecoding_from_file_ps="1" >    
+    
+    <raw_data_vs><![CDATA[#version 310 es   
+precision highp float;
+in vec4 gxl3d_Position;
+void main()
+{
+  gl_Position = gxl3d_Position;
+}
+  ]]></raw_data_vs>
+  
+  </gpu_program>
+
+  
+
+
+
+
+  
+</glsl_hacker>
