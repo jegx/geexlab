@@ -11,5 +11,5 @@ This demo requires GeeXLab:
 
 <b>Screenshots</b>:
 
-![alt text](https://github.com/jegx/geexlab/blob/master/demos/shader-fire/screenshots/geexlab-demo-fire-shader.jpg)
+![alt text](https://github.com/jegx/geexlab/blob/master/demos/shader-fire/screenshots/geexlab-simple-fire-shader-glsl-01.jpg)
 
