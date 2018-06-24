@@ -14,7 +14,7 @@ https://www.geeks3d.com/geexlab/downloads/
 <br>
 ![alt text](https://github.com/jegx/geexlab/blob/master/demos/shader-2d-grid/screenshots/geexlab-2d-grid-glsl-demo-01.png)
 
-<br>
 ![alt text](https://github.com/jegx/geexlab/blob/master/demos/shader-2d-grid/screenshots/geexlab-2d-grid-glsl-demo-02.png)
+
 
 
