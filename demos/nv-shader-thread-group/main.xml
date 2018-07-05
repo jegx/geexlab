@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<!--
+Shader Thread Group (OpenGL 4.3) demo.
+
+GL_NV_shader_thread_group
+https://www.khronos.org/registry/OpenGL/extensions/NV/NV_shader_thread_group.txt
+
+Life of a triangle - NVIDIA's logical pipeline 
+https://developer.nvidia.com/content/life-triangle-nvidias-logical-pipeline
+
+-->
+
+
+<glsl_hacker>
+
+  <window name="win3d01" title="Shader Thread Group (OpenGL 4.3)" 
+          width="600" height="800" 
+          gl_version_major="4" gl_version_minor="3" gl_core_profile="0"
+          build_opengl_extensions_list="1" />
+          
+
+  
+	<script name="init_scene" run_mode="INIT" >
+		<raw_data><![CDATA[	
+    
+   
+winW, winH = gh_window.getsize()
+   
+font = gh_utils.font_create("Tahoma", 14)
+
+
+camera_ortho = gh_camera.create_ortho(-winW/2, winW/2, -winH/2, winH/2, 1.0, 10.0)
+gh_camera.set_viewport(camera_ortho, 0, 0, winW, winH)
+gh_camera.set_position(camera_ortho, 0, 0, 4)
+
+
+
+
+GL_NV_shader_thread_group_ok = gh_renderer.check_opengl_extension("GL_NV_shader_thread_group")
+
+
+
+mesh_quad = gh_mesh.create_quad(256, 256)
+
+gpu_prog = 0
+warp_size = 0
+warp_per_sm = 0
+sm_count = 0
+
+-- mode: 0 (gl_WarpIDNV) or 1 (gl_SMIDNV)
+stg_mode = 1
+
+if (GL_NV_shader_thread_group_ok == 1) then
+  gpu_prog = gh_node.getid("stg_prog")
+  
+  warp_size, warp_per_sm, sm_count = gh_renderer.shader_thread_group_get_properties_nv()
+  
+else  
+  gpu_prog = gh_node.getid("color_prog")
+end
+
+
+
+gh_renderer.set_vsync(1)
+gh_renderer.set_scissor_state(0)
+
+
+local elapsed_time = gh_utils.get_elapsed_time()
+last_time = elapsed_time
+frame = 0
+
+		]]></raw_data>
+	</script> 
+  
+  
+  
+  
+
+	<script name="update_scene" run_mode="FRAME" >
+		<raw_data><![CDATA[	
+
+local elapsed_time = gh_utils.get_elapsed_time()
+local diff_time = elapsed_time - last_time
+last_time = elapsed_time
+
+
+gh_renderer.set_depth_test_state(1)
+
+gh_camera.bind(camera_ortho)
+gh_renderer.clear_color_depth_buffers(0.2, 0.2, 0.2, 1.0, 1.0)
+
+
+
+-- Render the quad.
+--
+gh_gpu_program.bind(gpu_prog)
+gh_gpu_program.uniform1i(gpu_prog, "stg_mode", 0)
+gh_object.set_position(mesh_quad, 0, 128, 0)
+gh_object.render(mesh_quad)
+
+gh_gpu_program.uniform1i(gpu_prog, "stg_mode", 1)
+gh_object.set_position(mesh_quad, 0, -128-65, 0)
+gh_object.render(mesh_quad)
+
+
+
+gh_utils.font_render(font, 10, 20, 0.2, 1.0, 0.0, 1.0, "GeeXLab - Shader Thread Group (OpenGL 4.3)")
+
+gh_utils.font_render(font, 10, 40, 1.0, 1.0, 0.0, 1.0, string.format("OpenGL renderer: %s", gh_renderer.get_renderer_model()))
+
+
+if (GL_NV_shader_thread_group_ok == 1) then
+  gh_utils.font_render(font, 10, 60, 0.2, 1.0, 0.0, 1.0, "GL_NV_shader_thread_group supported")
+  gh_utils.font_render(font, 10, 80, 1.0, 1.0, 1.0, 1.0, string.format("warp_size=%d - warp_per_sm=%d - sm_count=%d", warp_size, warp_per_sm, sm_count))
+  
+  --if (stg_mode == 0) then
+  --  gh_utils.font_render(font, 10, 100, 1.0, 0.6, 0.1, 1.0, "Colored by fragment gl_WarpIDNV")
+  --else
+  --  gh_utils.font_render(font, 10, 100, 1.0, 0.6, 0.1, 1.0, "Colored by fragment gl_SMIDNV")
+  --end
+
+  gh_utils.font_render(font, 10, 120, 1.0, 0.6, 0.1, 1.0, "Colored by fragment gl_WarpIDNV")
+  gh_utils.font_render(font, 10, 440, 1.0, 0.6, 0.1, 1.0, "Colored by fragment gl_SMIDNV")
+
+ 
+  
+else  
+  gh_utils.font_render(font, 10, 60, 1.0, 0.2, 0.0, 1.0, "GL_NV_shader_thread_group NOT supported!!!")
+  
+end
+
+
+
+
+		]]></raw_data>
+	</script> 
+
+	
+
+	<script name="resize_scene" run_mode="SIZE" >
+		<raw_data><![CDATA[	
+
+winW, winH = gh_window.getsize(0)
+
+gh_camera.update_ortho(camera_ortho, -winW/2, winW/2, -winH/2, winH/2, 1.0, 10.0)
+gh_camera.set_viewport(camera_ortho, 0, 0, winW, winH)
+
+
+
+gh_utils.font_set_viewport_info(font, 0, 0, winW, winH)
+
+
+		]]></raw_data>
+	</script> 
+  
+  
+  
+  
+  
+  <gpu_program name="stg_prog" >
+    <raw_data_vs><![CDATA[	 
+#version 150
+in vec4 gxl3d_Position;
+uniform mat4 gxl3d_ModelViewProjectionMatrix;
+void main()
+{
+  gl_Position = gxl3d_ModelViewProjectionMatrix * gxl3d_Position;
+}
+  ]]></raw_data_vs>
+    <raw_data_ps><![CDATA[	 
+#version 430
+#extension GL_NV_shader_thread_group : require
+uniform int stg_mode; // 0 (by WarpID) or  1 (by SMID)
+out vec4 FragColor;
+void main()
+{
+  float r = 0.0;
+  float g = 0.0;
+  float b = 0.0;
+
+  if (gl_WarpIDNV == 0)
+  {
+    g = float(gl_ThreadInWarpNV) / float(gl_WarpSizeNV-1);
+  }
+  else
+  {
+    if (stg_mode == 0)
+      r = float(gl_WarpIDNV) / float(gl_WarpsPerSMNV-1);
+    else  
+      r = float(gl_SMIDNV) / float(gl_SMCountNV-1);
+  }
+  
+  FragColor = vec4(r, g, b, 1.0);
+}
+    ]]></raw_data_ps>
+  </gpu_program>
+
+
+  
+  
+  <gpu_program name="color_prog" >
+    <raw_data_vs><![CDATA[	 
+#version 150
+in vec4 gxl3d_Position;
+uniform mat4 gxl3d_ModelViewProjectionMatrix;
+void main()
+{
+  gl_Position = gxl3d_ModelViewProjectionMatrix * gxl3d_Position;
+}
+  ]]></raw_data_vs>
+    <raw_data_ps><![CDATA[	 
+#version 150
+out vec4 Out_Color;
+uniform vec4 color;
+void main()
+{
+  Out_Color = color;
+}
+    ]]></raw_data_ps>
+  </gpu_program>
+
+  
+  
+  
+</glsl_hacker>
