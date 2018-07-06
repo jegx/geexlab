@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+
+<glsl_hacker>
+	
+    <window name="win3d01" title="Loops" 
+          width="1280" height="720" 
+          gl_version_major="2" gl_version_minor="1" />
+
+
+
+  <script name="init0" run_mode="INIT" >
+    <raw_data><![CDATA[ 
+
+-- The loop effect.
+--
+local demo_dir = gh_utils.get_demo_dir()     
+dofile(demo_dir .. "loops/loop_099.lua")   
+
+
+    ]]></raw_data>
+  </script>
+
+
+  
+	<script name="init_scene" run_mode="INIT" filename="lua/init.lua"  />
+
+  <script name="frame" run_mode="FRAME" filename="lua/frame.lua" update_from_file_every_frame="1" />
+
+	<script name="resize_scene" run_mode="SIZE" filename="lua/resize.lua" />
+  
+	<script name="terminate_scene" run_mode="TERMINATE" filename="lua/terminate.lua" />
+
+  
+  
+  
+
+
+  <gpu_program name="lighting_prog" 
+               filename_vs="assets/shaders/lighting_prog_vs_gl21.glsl" livecoding_from_file_vs="1" 
+               filename_ps="assets/shaders/lighting_prog_ps_gl21.glsl" livecoding_from_file_ps="1" />
+
+               
+               
+               
+               
+  
+  <gpu_program name="color_prog" >
+    <raw_data_vs><![CDATA[	 
+#version 120
+uniform mat4 gxl3d_ModelViewProjectionMatrix;
+
+varying vec4 color;
+
+void main()
+{
+  gl_Position = gxl3d_ModelViewProjectionMatrix * gl_Vertex;
+  color = gl_Color;
+}
+  ]]></raw_data_vs>
+
+  <raw_data_ps><![CDATA[	 
+#version 120
+
+varying vec4 color;
+
+void main()
+{
+  gl_FragColor = color;
+}
+    ]]></raw_data_ps>
+  </gpu_program>
+  
+  
+  
+</glsl_hacker>
